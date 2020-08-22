@@ -9,6 +9,7 @@ import (
 	"reflect"
 )
 
+// Use DefaultOptions() to retrieve an object with sane defaults.
 type Options struct {
 	ArrangeArray    bool
 	ArrangeVertical bool
