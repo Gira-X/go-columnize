@@ -20,7 +20,6 @@ type Options struct {
 	LinePrefix      string
 	LineSuffix      string
 	LJustify        bool
-	TermAdjust      bool
 }
 
 func DefaultOptions() Options {
@@ -35,7 +34,6 @@ func DefaultOptions() Options {
 		LinePrefix:      "",
 		LineSuffix:      "\n",
 		LJustify:        true,
-		TermAdjust:      false,
 	}
 	return opts
 }
