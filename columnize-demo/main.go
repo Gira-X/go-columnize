@@ -24,16 +24,16 @@ func main() {
 	// 			opts[colsep] =  '  ',
 	// 			opts[arrange_vertical] = bool
 	// 			fmt.Println("Width: %d %s", width, dir)
-	// 			fmt.Println(columnize.Columnize(data, opts))
+	// 			fmt.Println(columnize.Format(data, opts))
 	// 		}
 	// 	}
 	// }
 
- 	// fmt.Println Columnize::columnize.Columnize(5)
- 	// fmt.Println columnize.Columnize(["a", 2, "c"], :displaywidth =>10,
+ 	// fmt.Println Format::columnize.Format(5)
+ 	// fmt.Println columnize.Format(["a", 2, "c"], :displaywidth =>10,
         //                                 :colsep => ', ')
-	// fmt.Println columnize.Columnize(["oneitem"])
- 	// fmt.Println columnize.Columnize(["one", "two", "three"])
+	// fmt.Println columnize.Format(["oneitem"])
+ 	// fmt.Println columnize.Format(["one", "two", "three"])
 	data := []string{
 		"one",       "two",         "three",
 		"for",       "five",        "six",

@@ -9,7 +9,7 @@ import (
 	"reflect"
 )
 
-type OptsT struct {
+type Options struct {
 	ArrangeArray    bool
 	ArrangeVertical bool
 	ArrayPrefix     string
@@ -23,8 +23,8 @@ type OptsT struct {
 	TermAdjust      bool
 }
 
-func DefaultOptions() OptsT {
-	opts := OptsT{
+func DefaultOptions() Options {
+	opts := Options{
 		ArrangeArray:    false,
 		ArrangeVertical: true,
 		ArrayPrefix:     "",
@@ -40,49 +40,8 @@ func DefaultOptions() OptsT {
 	return opts
 }
 
-type KeyValuePairT struct {
-	Field string
-	Value interface{}
-}
-
-func SetOptions(pairs ...KeyValuePairT) OptsT {
-	opts := DefaultOptions()
-	for _, pair := range pairs {
-		switch pair.Field {
-		case "ArrangeArray":
-			v, _ := pair.Value.(bool)
-			opts.ArrangeArray = v
-		case "ArrangeVertical":
-			v, _ := pair.Value.(bool)
-			opts.ArrangeVertical = v
-		case "ArrayPrefix":
-			v, _ := pair.Value.(string)
-			opts.ArrayPrefix = v
-		case "ArraySuffix":
-			v, _ := pair.Value.(string)
-			opts.ArraySuffix = v
-		case "CellFmt":
-			v, _ := pair.Value.(string)
-			opts.CellFmt = v
-		case "ColSep":
-			v, _ := pair.Value.(string)
-			opts.ColSep = v
-		case "DisplayWidth":
-			v, _ := pair.Value.(int)
-			opts.DisplayWidth = v
-		case "LJustify":
-			v, _ := pair.Value.(bool)
-			opts.LJustify = v
-		case "TermAdjust":
-			v, _ := pair.Value.(bool)
-			opts.TermAdjust = v
-		}
-	}
-	return opts
-}
-
-// Return the length of string cell
-func CellSize(cell string) int {
+// cellSize() returns the length of a string cell.
+func cellSize(cell string) int {
 	return len(cell)
 }
 
@@ -98,16 +57,13 @@ func max(a, b int) int {
 // http://play.golang.org/p/bxdcIj6ueH
 
 /*
-   ToStringSliceFromIndexable(slice_or_array, [format_string]) => [] string
+toStringSliceFromIndexable runs fmt.Sprint on each of the passed elements in x.
+If optFmt is given, that is the format string passed to fmt.Sprintf.
 
-Run fmt.Sprint on each of the elemnts in slice_or_array. If
-format_string is given, that is the format string passed to fmt.Sprintf.
-
-This routine assumes slice_or_array is a value which has a length,
-and can be indexed (a slice/array). No checking on or error is thrown
-if this is not the case.
+This function assumes that x is a slice or an array.
+No checking on or error is thrown if this is not the case.
 */
-func ToStringSliceFromIndexable(x interface{}, optFmt ...string) []string {
+func toStringSliceFromIndexable(x interface{}, optFmt ...string) []string {
 	v := reflect.ValueOf(x)
 	out := make([]string, v.Len())
 	for i := range out {
@@ -121,14 +77,10 @@ func ToStringSliceFromIndexable(x interface{}, optFmt ...string) []string {
 }
 
 /*
-ToStringSlice(data, [format_string]) => [] string
-
-If data is a slice or array, runs
-ToStringSliceFromIndexable. Otherwise, data is put into a slice and
-ToStringSliceFromIndexable is called on that slice of one element.
-
+toStringSlice uses toStringSliceFromIndexable if the passed data is a slice or array
+or just converts the passed data via fmt.Sprintf.
 */
-func ToStringSlice(x interface{}, optFmt ...string) []string {
+func toStringSlice(x interface{}, optFmt ...string) []string {
 	v := reflect.ValueOf(x)
 	if v.Kind() != reflect.Array && v.Kind() != reflect.Slice {
 		// Not an array or slice, so run fmt.Sprint and turn that
@@ -140,41 +92,41 @@ func ToStringSlice(x interface{}, optFmt ...string) []string {
 		}
 	}
 	if 0 == len(optFmt) {
-		return ToStringSliceFromIndexable(x)
+		return toStringSliceFromIndexable(x)
 	}
-	return ToStringSliceFromIndexable(x, optFmt[0])
+	return toStringSliceFromIndexable(x, optFmt[0])
 }
 
 /*
- Return a string from an array with embedded newlines formatted so
- that when printed the columns are aligned.
+Format() returns a string from an array with embedded newlines formatted so
+that when printed the columns are aligned.
 
- For example:, for a line width of 4 characters (arranged vertically):
+For example:, for a line width of 4 characters (arranged vertically):
 
 	a = [] int{1,2,4,4}
-	columnize.Columnize(a) => '1  3\n2  4\n'
+	columnize.Format(a) => '1  3\n2  4\n'
 
 Arranged horizontally:
 
 	opts := columnize.Default_options()
 	opts.arrange_vertical = false
-	columnize.Columnize(a) =>  '1  2\n3  4\n'
+	columnize.Format(a) =>  '1  2\n3  4\n'
 
-Each column is only as wide as necessary.  By default, columns are
-separated by two spaces
+Each column is only as wide as necessary.
+By default, columns are separated by two spaces.
 */
-func Columnize(list interface{}, opts OptsT) string {
+func Format(list interface{}, opts Options) string {
 	var l []string
 	if opts.CellFmt != "" {
-		l = ToStringSlice(list, opts.CellFmt)
+		l = toStringSlice(list, opts.CellFmt)
 	} else {
-		l = ToStringSlice(list)
+		l = toStringSlice(list)
 	}
-	return ColumnizeS(l, opts)
+	return FormatStringList(l, opts)
 }
 
-// Like Columnize but we are already passed a slice of string
-func ColumnizeS(list []string, opts OptsT) string {
+// FormatStringList works like Format(), but only accepts a string slice
+func FormatStringList(list []string, opts Options) string {
 
 	if opts.ArrangeArray {
 		opts.ArrayPrefix = "["
@@ -229,7 +181,7 @@ func ColumnizeS(list []string, opts OptsT) string {
 					if i >= len(list) {
 						break
 					}
-					colwidth = max(CellSize(list[i]), colwidth)
+					colwidth = max(cellSize(list[i]), colwidth)
 				}
 				colwidths = append(colwidths, colwidth)
 				totwidth += colwidth + len(opts.ColSep)
@@ -270,9 +222,11 @@ func ColumnizeS(list []string, opts OptsT) string {
 					if ncols != 1 {
 						var fmtStr string
 						if opts.LJustify {
+							//goland:noinspection GoNilness
 							fmtStr = fmt.Sprintf("%%%ds", -colwidths[col])
 							texts[col] = fmt.Sprintf(fmtStr, texts[col])
 						} else {
+							//goland:noinspection GoNilness
 							fmtStr = fmt.Sprintf("%%%ds", colwidths[col])
 							texts[col] = fmt.Sprintf(fmtStr, texts[col])
 						}
@@ -312,7 +266,7 @@ func ColumnizeS(list []string, opts OptsT) string {
 						if i >= len(list) {
 							break
 						}
-						colwidth = max(colwidth, CellSize(list[i]))
+						colwidth = max(colwidth, cellSize(list[i]))
 					}
 					colwidths = append(colwidths, colwidth)
 					totalWidth += colwidth + len(opts.ColSep)
@@ -367,9 +321,11 @@ func ColumnizeS(list []string, opts OptsT) string {
 				if ncols != 1 {
 					var fmtStr string
 					if opts.LJustify {
+						//goland:noinspection GoNilness
 						fmtStr = fmt.Sprintf("%%%ds", -colwidths[col])
 						texts[col] = fmt.Sprintf(fmtStr, texts[col])
 					} else {
+						//goland:noinspection GoNilness
 						fmtStr = fmt.Sprintf("%%%ds", colwidths[col])
 						texts[col] = fmt.Sprintf(fmtStr, texts[col])
 					}

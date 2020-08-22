@@ -11,7 +11,7 @@ so that when printed the columns are aligned.
 	data := []int{1, 2, 3, 4}
 	opts := columnize.DefaultOptions()
 	opts.DisplayWidth = 10
-	fmt.Println(columnize.Columnize(data, opts))
+	fmt.Println(columnize.Format(data, opts))
 	# prints "1  3\n2  4\n"
 
 
@@ -35,25 +35,24 @@ Examples
 
 	data := []int{1, 2, 3, 4}
 	opts := columnize.DefaultOptions()
-	fmt.Println(columnize.Columnize(data, opts))
+	fmt.Println(columnize.Format(data, opts))
 
 	opts.DisplayWidth = 8
 	opts.CellFmt = "%02d"
-	fmt.Println(columnize.Columnize(data, opts))
+	fmt.Println(columnize.Format(data, opts))
 
 	opts.ArrangeArray = true
 	opts.CellFmt = ""
-	fmt.Println(columnize.Columnize(data, opts))
+	fmt.Println(columnize.Format(data, opts))
 
 Author
 
 	Rocky Bernstein	<rocky@gnu.org>
 
 	Also available in Python (columnize), and Perl
-	(Array::Columnize) and Ruby (columnize)
+	(Array::Format) and Ruby (columnize)
 
 	Copyright 2013 Rocky Bernstein.
 
 */
 package columnize
-const VERSION string = "1.0"
