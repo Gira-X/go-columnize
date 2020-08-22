@@ -40,11 +40,6 @@ func DefaultOptions() Options {
 	return opts
 }
 
-// cellSize() returns the length of a string cell.
-func cellSize(cell string) int {
-	return len(cell)
-}
-
 func max(a, b int) int {
 	if a > b {
 		return a
@@ -52,7 +47,7 @@ func max(a, b int) int {
 	return b
 }
 
-// The following routines ToStringArrayFromIndexable and ToStringArray are
+// The following routines toStringArrayFromIndexable and toStringArray are
 // from Carlos Castillo. Thanks Carlos!
 // http://play.golang.org/p/bxdcIj6ueH
 
@@ -181,7 +176,7 @@ func FormatStringList(list []string, opts Options) string {
 					if i >= len(list) {
 						break
 					}
-					colwidth = max(cellSize(list[i]), colwidth)
+					colwidth = max(len(list[i]), colwidth)
 				}
 				colwidths = append(colwidths, colwidth)
 				totwidth += colwidth + len(opts.ColSep)
@@ -222,11 +217,9 @@ func FormatStringList(list []string, opts Options) string {
 					if ncols != 1 {
 						var fmtStr string
 						if opts.LJustify {
-							//goland:noinspection GoNilness
 							fmtStr = fmt.Sprintf("%%%ds", -colwidths[col])
 							texts[col] = fmt.Sprintf(fmtStr, texts[col])
 						} else {
-							//goland:noinspection GoNilness
 							fmtStr = fmt.Sprintf("%%%ds", colwidths[col])
 							texts[col] = fmt.Sprintf(fmtStr, texts[col])
 						}
@@ -266,7 +259,7 @@ func FormatStringList(list []string, opts Options) string {
 						if i >= len(list) {
 							break
 						}
-						colwidth = max(colwidth, cellSize(list[i]))
+						colwidth = max(colwidth, len(list[i]))
 					}
 					colwidths = append(colwidths, colwidth)
 					totalWidth += colwidth + len(opts.ColSep)
@@ -321,11 +314,9 @@ func FormatStringList(list []string, opts Options) string {
 				if ncols != 1 {
 					var fmtStr string
 					if opts.LJustify {
-						//goland:noinspection GoNilness
 						fmtStr = fmt.Sprintf("%%%ds", -colwidths[col])
 						texts[col] = fmt.Sprintf(fmtStr, texts[col])
 					} else {
-						//goland:noinspection GoNilness
 						fmtStr = fmt.Sprintf("%%%ds", colwidths[col])
 						texts[col] = fmt.Sprintf(fmtStr, texts[col])
 					}
