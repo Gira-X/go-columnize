@@ -45,11 +45,11 @@ func ArrayOptions() Options {
 		ArrangeVertical: false,
 		ArrayPrefix:     "[",
 		ArraySuffix:     "]",
-		CellFmt:         `"%s"`,
+		CellFmt:         `"%v"`,
 		ColSep:          ", ",
 		DisplayWidth:    80,
 		LinePrefix:      "",
-		LineSuffix:      ",",
+		LineSuffix:      ", ",
 		LJustify:        true,
 	}
 }

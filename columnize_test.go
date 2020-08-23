@@ -31,11 +31,11 @@ func checkArrangeArray(t *testing.T) {
 	opts := ArrayOptions()
 	opts.DisplayWidth = 10
 	testData := []int{1, 2, 3, 4}
-	checkColumnize("[1, 2,\n 3, 4,\n ]\n", testData, opts, t)
+	checkColumnize(`["1", "2", "3", "4", ]`, testData, opts, t)
 
 	opts.DisplayWidth = 8
 	opts.CellFmt = "%02d"
-	checkColumnize("[01, 02,\n 03, 04,\n ]\n", testData, opts, t)
+	checkColumnize("[01, 02, 03, 04, ]", testData, opts, t)
 }
 
 func TestColumnize(t *testing.T) {
