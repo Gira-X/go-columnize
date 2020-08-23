@@ -44,7 +44,6 @@ func main() {
 	fmt.Println(columnize.Format(a, opts))
 	fmt.Println("----------------")
 
-	opts.ArrangeArray = true
-	fmt.Println(columnize.Format(a, opts))
+	fmt.Println(columnize.Format(a, columnize.ArrayOptions()))
 
 }
