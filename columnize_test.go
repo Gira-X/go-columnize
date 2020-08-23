@@ -25,8 +25,12 @@ func checkIntArrays(opts Options, t *testing.T) {
 
 	opts.ArrangeVertical = false
 	checkColumnize("1  2\n3  4\n", testData, opts, t)
+}
 
-	opts.ArrangeArray = true
+func checkArrangeArray(t *testing.T) {
+	opts := ArrayOptions()
+	opts.DisplayWidth = 10
+	testData := []int{1, 2, 3, 4}
 	checkColumnize("[1, 2,\n 3, 4,\n ]\n", testData, opts, t)
 
 	opts.DisplayWidth = 8
@@ -51,4 +55,5 @@ func TestColumnize(t *testing.T) {
 
 	checkIntArrays(opts, t)
 
+	checkArrangeArray(t)
 }

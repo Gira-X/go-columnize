@@ -1,5 +1,9 @@
 // Copyright 2013 Rocky Bernstein.
 //
+// The functions toStringArrayFromIndexable and toStringArray are
+// from Carlos Castillo. Thanks Carlos!
+// http://play.golang.org/p/bxdcIj6ueH
+//
 // Adapted from the routine of the same name from Ruby.
 
 package columnize
@@ -9,9 +13,8 @@ import (
 	"reflect"
 )
 
-// Use DefaultOptions() to retrieve an object with sane defaults.
+// Use DefaultOptions() or ArrayOptions() to retrieve an object with sane defaults.
 type Options struct {
-	ArrangeArray    bool
 	ArrangeVertical bool
 	ArrayPrefix     string
 	ArraySuffix     string
@@ -24,8 +27,7 @@ type Options struct {
 }
 
 func DefaultOptions() Options {
-	opts := Options{
-		ArrangeArray:    false,
+	return Options{
 		ArrangeVertical: true,
 		ArrayPrefix:     "",
 		ArraySuffix:     "",
@@ -36,7 +38,20 @@ func DefaultOptions() Options {
 		LineSuffix:      "\n",
 		LJustify:        true,
 	}
-	return opts
+}
+
+func ArrayOptions() Options {
+	return Options{
+		ArrangeVertical: false,
+		ArrayPrefix:     "[",
+		ArraySuffix:     "]",
+		CellFmt:         `"%s"`,
+		ColSep:          ", ",
+		DisplayWidth:    80,
+		LinePrefix:      "",
+		LineSuffix:      ",",
+		LJustify:        true,
+	}
 }
 
 func max(a, b int) int {
@@ -46,10 +61,6 @@ func max(a, b int) int {
 	return b
 }
 
-// The following routines toStringArrayFromIndexable and toStringArray are
-// from Carlos Castillo. Thanks Carlos!
-// http://play.golang.org/p/bxdcIj6ueH
-
 /*
 toStringSliceFromIndexable runs fmt.Sprint on each of the passed elements in x.
 If optFmt is given, that is the format string passed to fmt.Sprintf.
@@ -57,14 +68,14 @@ If optFmt is given, that is the format string passed to fmt.Sprintf.
 This function assumes that x is a slice or an array.
 No checking on or error is thrown if this is not the case.
 */
-func toStringSliceFromIndexable(x interface{}, optFmt ...string) []string {
+func toStringSliceFromIndexable(x interface{}, optFmt string) []string {
 	v := reflect.ValueOf(x)
 	out := make([]string, v.Len())
 	for i := range out {
-		if 0 == len(optFmt) {
+		if optFmt == "" {
 			out[i] = fmt.Sprint(v.Index(i).Interface())
 		} else {
-			out[i] = fmt.Sprintf(optFmt[0], v.Index(i).Interface())
+			out[i] = fmt.Sprintf(optFmt, v.Index(i).Interface())
 		}
 	}
 	return out
@@ -74,21 +85,17 @@ func toStringSliceFromIndexable(x interface{}, optFmt ...string) []string {
 toStringSlice uses toStringSliceFromIndexable if the passed data is a slice or array
 or just converts the passed data via fmt.Sprintf.
 */
-func toStringSlice(x interface{}, optFmt ...string) []string {
+func toStringSlice(x interface{}, optFmt string) []string {
 	v := reflect.ValueOf(x)
 	if v.Kind() != reflect.Array && v.Kind() != reflect.Slice {
 		// Not an array or slice, so run fmt.Sprint and turn that
 		// single item into a slice.
-		if 0 == len(optFmt) {
+		if optFmt == "" {
 			return []string{fmt.Sprint(x)}
-		} else {
-			return []string{fmt.Sprintf(optFmt[0], x)}
 		}
+		return []string{fmt.Sprintf(optFmt, x)}
 	}
-	if 0 == len(optFmt) {
-		return toStringSliceFromIndexable(x)
-	}
-	return toStringSliceFromIndexable(x, optFmt[0])
+	return toStringSliceFromIndexable(x, optFmt)
 }
 
 /*
@@ -110,26 +117,12 @@ Each column is only as wide as necessary.
 By default, columns are separated by two spaces.
 */
 func Format(list interface{}, opts Options) string {
-	var l []string
-	if opts.CellFmt != "" {
-		l = toStringSlice(list, opts.CellFmt)
-	} else {
-		l = toStringSlice(list)
-	}
+	l := toStringSlice(list, opts.CellFmt)
 	return FormatStringList(l, opts)
 }
 
 // FormatStringList works like Format(), but only accepts a string slice
 func FormatStringList(list []string, opts Options) string {
-
-	if opts.ArrangeArray {
-		opts.ArrayPrefix = "["
-		opts.ArraySuffix = "]\n"
-		opts.LinePrefix = " "
-		opts.LineSuffix = ",\n"
-		opts.ColSep = ", "
-		opts.ArrangeVertical = false
-	}
 
 	var prefix string
 	if len(opts.ArrayPrefix) == 0 {
@@ -198,8 +191,8 @@ func FormatStringList(list []string, opts Options) string {
 			nrows = len(list)
 		}
 		// The smallest number of rows computed and the max widths for
-		// each column has been obtained.  Now we just have to format
-		// each of the rows.
+		// each column has been obtained.
+		// Now we just have to format each of the rows.
 		s := ""
 		for row := 0; row < nrows; row++ {
 			texts := make([]string, 0)
