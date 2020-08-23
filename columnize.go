@@ -158,16 +158,17 @@ func FormatStringList(list []string, opts Options) string {
 	}
 
 	var ncols, nrows int
-	var colwidths = make([]int, 0)
 
 	if opts.ArrangeVertical {
 		arrayIndex := func(numRows, row, col int) int {
 			return numRows*col + row
 		}
+		var colwidths []int
 		// Try every row count from 1 upwards
 		for nrows = 1; nrows < len(list); nrows++ {
 			ncols = (len(list) + nrows - 1) / nrows
 			totwidth := -len(opts.ColSep)
+			colwidths = make([]int, 0)
 
 			for col := 0; col < ncols; col++ {
 				// get max column width for this column
@@ -238,6 +239,7 @@ func FormatStringList(list []string, opts Options) string {
 		}
 		return s
 	} else {
+		var colwidths []int
 		arrayIndex := func(ncols, row, col int) int {
 			return ncols*(row-1) + col
 		}
@@ -250,6 +252,7 @@ func FormatStringList(list []string, opts Options) string {
 			minRows := (len(list) + ncols - 1) / ncols
 			for nrows = minRows; nrows <= (len(list)); nrows++ {
 				roundedSize = nrows * ncols
+				colwidths = make([]int, 0)
 				totalWidth = -len(opts.ColSep)
 				var colwidth, row int
 				for col := 0; col < ncols; col++ {
