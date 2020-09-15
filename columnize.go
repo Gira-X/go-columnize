@@ -13,6 +13,8 @@ import (
 	"reflect"
 )
 
+// Options contains all the available configuration for use in Format().
+//
 // Use DefaultOptions() or ArrayOptions() to retrieve an object with sane defaults.
 type Options struct {
 	ArrangeVertical bool
@@ -26,6 +28,7 @@ type Options struct {
 	LJustify        bool
 }
 
+// DefaultOptions returns a display width of 80 with new line as the separator.
 func DefaultOptions() Options {
 	return Options{
 		ArrangeVertical: true,
@@ -40,6 +43,8 @@ func DefaultOptions() Options {
 	}
 }
 
+// ArrayOptions returns a format like this:
+//   ["1", "2", "3", "4", ]
 func ArrayOptions() Options {
 	return Options{
 		ArrangeVertical: false,
@@ -98,32 +103,29 @@ func toStringSlice(x interface{}, optFmt string) []string {
 	return toStringSliceFromIndexable(x, optFmt)
 }
 
-/*
-Format() returns a string from an array with embedded newlines formatted so
-that when printed the columns are aligned.
-
-For example:, for a line width of 4 characters (arranged vertically):
-
-	a = [] int{1,2,4,4}
-	columnize.Format(a) => '1  3\n2  4\n'
-
-Arranged horizontally:
-
-	opts := columnize.Default_options()
-	opts.arrange_vertical = false
-	columnize.Format(a) =>  '1  2\n3  4\n'
-
-Each column is only as wide as necessary.
-By default, columns are separated by two spaces.
-*/
+// Format returns a string from an array with embedded newlines formatted so
+// that when printed the columns are aligned.
+//
+// For example:, for a line width of 4 characters (arranged vertically):
+//
+//	a = [] int{1,2,3,4}
+//	columnize.Format(a) => '1  3\n2  4\n'
+//
+// Arranged horizontally:
+//
+//	opts := columnize.DefaultOptions()
+//	opts.ArrangeVertical = false
+//	columnize.Format(a) =>  '1  2\n3  4\n'
+//
+// Each column is only as wide as necessary.
+// By default, columns are separated by two spaces.
 func Format(list interface{}, opts Options) string {
 	l := toStringSlice(list, opts.CellFmt)
 	return FormatStringList(l, opts)
 }
 
-// FormatStringList works like Format(), but only accepts a string slice
+// FormatStringList works like Format(), but only accepts a string slice.
 func FormatStringList(list []string, opts Options) string {
-
 	var prefix string
 	if len(opts.ArrayPrefix) == 0 {
 		prefix = opts.LinePrefix
@@ -230,105 +232,101 @@ func FormatStringList(list []string, opts Options) string {
 				s += line
 			}
 		}
-		return s
-	} else {
-		var colwidths []int
-		arrayIndex := func(ncols, row, col int) int {
-			return ncols*(row-1) + col
-		}
-		// Assign to make enlarge scope of loop variables.
-		var totalWidth, i, roundedSize int
-		var ncols, nrows int
-		// Try every column count from size downwards.
-		for ncols = len(list); ncols >= 1; ncols-- {
-			// Try every row count from 1 upwards
-			minRows := (len(list) + ncols - 1) / ncols
-			for nrows = minRows; nrows <= (len(list)); nrows++ {
-				roundedSize = nrows * ncols
-				colwidths = make([]int, 0)
-				totalWidth = -len(opts.ColSep)
-				var colwidth, row int
-				for col := 0; col < ncols; col++ {
-					// get max column width for this column
-					for row = 1; row <= nrows; row++ {
-						i = arrayIndex(ncols, row, col)
-						if i >= len(list) {
-							break
-						}
-						colwidth = max(colwidth, len(list[i]))
-					}
-					colwidths = append(colwidths, colwidth)
-					totalWidth += colwidth + len(opts.ColSep)
-					if totalWidth > opts.DisplayWidth {
-						break
-					}
-				}
-				if totalWidth <= opts.DisplayWidth {
-					// Found the right nrows and ncols
-					nrows = row
-					break
-				} else {
-					if totalWidth > opts.DisplayWidth {
-						// Need to reduce ncols
-						break
-					}
-				}
-			}
-			if totalWidth <= opts.DisplayWidth && i >= roundedSize-1 {
-				break
-			}
-		}
-		if ncols < 1 {
-			ncols = 1
-		}
-		if ncols == 1 {
-			nrows = len(list)
-		}
-		// The smallest number of rows computed and the max widths for
-		// each column has been obtained.  Now we just have to format
-		// each of the rows.
-		s := ""
-		var prefix string
-		if len(opts.ArrayPrefix) == 0 {
-			prefix = opts.LinePrefix
-		} else {
-			prefix = opts.ArrayPrefix
-		}
-		for row := 1; row <= nrows; row++ {
-			texts := make([]string, 0)
-			for col := 0; col < ncols; col++ {
-				var x string
-				i = arrayIndex(ncols, row, col)
-				if i >= len(list) {
-					break
-				} else {
-					x = list[i]
-				}
-				texts = append(texts, x)
-			}
-			for col := 0; col < len(texts); col++ {
-				if ncols != 1 {
-					var fmtStr string
-					if opts.LJustify {
-						fmtStr = fmt.Sprintf("%%%ds", -colwidths[col])
-						texts[col] = fmt.Sprintf(fmtStr, texts[col])
-					} else {
-						fmtStr = fmt.Sprintf("%%%ds", colwidths[col])
-						texts[col] = fmt.Sprintf(fmtStr, texts[col])
-					}
-				}
-			}
-			line := prefix
-			for i := 0; i < len(texts)-1; i++ {
-				line += fmt.Sprintf("%s%s", texts[i], opts.ColSep)
-			}
-			if len(texts) > 0 {
-				line += fmt.Sprintf("%s%s", texts[len(texts)-1], opts.LineSuffix)
-			}
-			s += line
-			prefix = opts.LinePrefix
-		}
-		s += opts.ArraySuffix
+
 		return s
 	}
+
+	var colwidths []int
+	arrayIndex := func(ncols, row, col int) int {
+		return ncols*(row-1) + col
+	}
+	// Assign to make enlarge scope of loop variables.
+	var totalWidth, i, roundedSize int
+
+	// Try every column count from size downwards.
+	for ncols = len(list); ncols >= 1; ncols-- {
+		// Try every row count from 1 upwards
+		minRows := (len(list) + ncols - 1) / ncols
+		for nrows = minRows; nrows <= (len(list)); nrows++ {
+			roundedSize = nrows * ncols
+			colwidths = make([]int, 0)
+			totalWidth = -len(opts.ColSep)
+			var colwidth, row int
+			for col := 0; col < ncols; col++ {
+				// get max column width for this column
+				for row = 1; row <= nrows; row++ {
+					i = arrayIndex(ncols, row, col)
+					if i >= len(list) {
+						break
+					}
+					colwidth = max(colwidth, len(list[i]))
+				}
+				colwidths = append(colwidths, colwidth)
+				totalWidth += colwidth + len(opts.ColSep)
+				if totalWidth > opts.DisplayWidth {
+					break
+				}
+			}
+			if totalWidth <= opts.DisplayWidth {
+				// Found the right nrows and ncols
+				nrows = row
+				break
+			} else {
+				if totalWidth > opts.DisplayWidth {
+					// Need to reduce ncols
+					break
+				}
+			}
+		}
+		if totalWidth <= opts.DisplayWidth && i >= roundedSize-1 {
+			break
+		}
+	}
+	if ncols < 1 {
+		ncols = 1
+	}
+	if ncols == 1 {
+		nrows = len(list)
+	}
+	// The smallest number of rows computed and the max widths for
+	// each column has been obtained.  Now we just have to format
+	// each of the rows.
+	s := ""
+
+	for row := 1; row <= nrows; row++ {
+		texts := make([]string, 0)
+		for col := 0; col < ncols; col++ {
+			var x string
+			i = arrayIndex(ncols, row, col)
+			if i >= len(list) {
+				break
+			} else {
+				x = list[i]
+			}
+			texts = append(texts, x)
+		}
+		for col := 0; col < len(texts); col++ {
+			if ncols != 1 {
+				var fmtStr string
+				if opts.LJustify {
+					fmtStr = fmt.Sprintf("%%%ds", -colwidths[col])
+					texts[col] = fmt.Sprintf(fmtStr, texts[col])
+				} else {
+					fmtStr = fmt.Sprintf("%%%ds", colwidths[col])
+					texts[col] = fmt.Sprintf(fmtStr, texts[col])
+				}
+			}
+		}
+		line := prefix
+		for i := 0; i < len(texts)-1; i++ {
+			line += fmt.Sprintf("%s%s", texts[i], opts.ColSep)
+		}
+		if len(texts) > 0 {
+			line += fmt.Sprintf("%s%s", texts[len(texts)-1], opts.LineSuffix)
+		}
+		s += line
+		prefix = opts.LinePrefix
+	}
+	s += opts.ArraySuffix
+	return s
 }

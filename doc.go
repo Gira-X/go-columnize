@@ -1,7 +1,8 @@
 /*
 
-Module to format a slice or array into a single string with embedded
-newlines, On printing the string, the columns are aligned.
+Package columnize formats a slice or array into a single string with embedded
+newlines.
+On printing the string, the columns are aligned.
 
 Summary
 
