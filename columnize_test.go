@@ -1,6 +1,9 @@
-package columnize
+package columnize_test
 
-import "testing"
+import (
+	. "columnize"
+	"testing"
+)
 
 func checkColumnize(expect string, data interface{}, opts Options, t *testing.T) {
 	got := Format(data, opts)
@@ -12,9 +15,10 @@ func checkColumnize(expect string, data interface{}, opts Options, t *testing.T)
 func verifyEqualityOfFormatFunctions(data []string, opts Options, t *testing.T) {
 	formatOutput := Format(data, opts)
 	formatStringOutput := FormatStringList(data, opts)
+
 	if formatOutput != formatStringOutput {
-		t.Errorf("Format() and FormatStringList() don't return an equal result:\n" +
-			"Format():\n%v\n" +
+		t.Errorf("Format() and FormatStringList() don't return an equal result:\n"+
+			"Format():\n%v\n"+
 			"FormatStringList():\n%v", formatOutput, formatStringOutput)
 	}
 }

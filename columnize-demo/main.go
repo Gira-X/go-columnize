@@ -1,8 +1,8 @@
 package main
 
 import (
+	"columnize"
 	"fmt"
-	"github.com/Gira-X/go-columnize"
 )
 
 func main() {
@@ -45,5 +45,4 @@ func main() {
 	fmt.Println("----------------")
 
 	fmt.Println(columnize.Format(a, columnize.ArrayOptions()))
-
 }
