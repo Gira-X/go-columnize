@@ -1,8 +1,9 @@
 package columnize_test
 
 import (
-	. "columnize"
 	"testing"
+
+	. "github.com/Gira-X/go-columnize"
 )
 
 func checkColumnize(expect string, data interface{}, opts Options, t *testing.T) {

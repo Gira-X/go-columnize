@@ -1,8 +1,9 @@
 package main
 
 import (
-	"columnize"
 	"fmt"
+
+	"github.com/Gira-X/go-columnize"
 )
 
 func main() {

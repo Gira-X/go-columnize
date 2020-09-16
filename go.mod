@@ -1,3 +1,3 @@
-module columnize
+module github.com/Gira-X/go-columnize
 
-go 1.14
+go 1.15
