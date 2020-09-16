@@ -5,3 +5,5 @@ Forked for those simple improvements:
 * Renamed `columnize.Columnize()` to `columnize.Format()` and `columnize.FormatStringList()` 
 to fit in with Golang's naming of things, as well as the now named `Options` type
 * Improved `columnize_test.go` and `columnize-demo/main.go` a bit and adjusted to new naming
+
+This is used in my [simple-ls](https://github.com/Gira-X/simple-ls) repository.
